@@ -3,12 +3,16 @@
 #include<cctype>
 
 using namespace std;
-void printarr(vector <char> arr){
-    cout<<"#";
-    for(int i = 0; i<arr.size(); i++){
-        cout<<arr[i];
-    }
-    cout<<endl;
+
+int preced(char op){
+    if(op == '^')
+        return 3;
+    else if(op == '*' || op == '/')
+        return 2;
+    else if(op == '+' || op == '-')
+        return 1;
+    else
+        return 0;
 }
 int main(){
     int t;
@@ -16,68 +20,34 @@ int main(){
     while(t--){
         int n;
         cin>>n;
-        string infix, postfix;
+
+        string infix, postfix = "";
         cin>>infix;
-        vector <char> stack;
-        for(int i = 0; i<n; i++){
-            printarr(stack);
-            if(infix[i]=='('){
+
+        vector<char>stack;
+        for(int i = 0; i<infix.size(); i++){
+            if(infix[i]=='(')
                 stack.push_back(infix[i]);
-                continue;
-            }
-            else if(isalpha(infix[i])){
-                postfix += infix[i]; 
-                continue;
-            }
-            else if(infix[i]==')'){
-                while(stack.back() != '('){
+            else if(isalpha(infix[i]))
+                postfix += infix[i];
+            else if(infix[i] == ')'){
+                while(stack.size()>0 && stack.back() != '('){
                     postfix += stack.back();
                     stack.pop_back();
                 }
-                stack.pop_back();       //popping last (
-                continue;
+                stack.pop_back();
             }
-            else if(infix[i] == '+' || infix[i] == '-'){
-                if(stack.size()>0){
-                    char temp = stack.back();
-                    if(temp == '*' || temp == '/' || temp == '^'){
-                        postfix += temp;
-                        stack.pop_back();
-                        stack.push_back(infix[i]);
-                        continue;
-                    }
-                    stack.push_back(infix[i]);
+            else{
+                while(stack.size()>0 && preced(infix[i])<=preced(stack.back())){
+                    postfix += stack.back();
+                    stack.pop_back();
                 }
-                else
-                    stack.push_back(infix[i]);
+                stack.push_back(infix[i]);
             }
-            else if(infix[i] == '*' || infix[i] == '/'){
-                if(stack.size()>0){
-                    char temp = stack.back();
-                    if(temp == '^'){
-                        postfix += temp;
-                        stack.pop_back();
-                        stack.push_back(infix[i]);
-                        continue;
-                    }
-                    stack.push_back(infix[i]);
-                }
-                else
-                    stack.push_back(infix[i]);
-            }
-            
         }
-        // cout<<"Exited loop1 : "<<endl;
-        while(stack.size()!=0){
-            char temp = stack.back();
-            if(temp != '(' || temp != ')'){
-                postfix += temp;
-                stack.pop_back();
-            }
-            else
-                stack.pop_back();
-            // cout<<"Exited loop2 : "<<temp<<endl;
-
+        while(stack.size()>0){
+            postfix += stack.back();
+            stack.pop_back();
         }
         cout<<postfix<<endl;
     }
